@@ -1,0 +1,709 @@
+/* ═══════════════════════════════════════════════
+   CyberFlower Language — 样式表
+   设计原则: 深色沉浸 · 荧光点缀 · 极简布局
+═══════════════════════════════════════════════ */
+
+:root {
+  --bg0: #0a0a0f;
+  --bg1: #111118;
+  --bg2: #18181f;
+  --bg3: #22222c;
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.15);
+  --text: #e8e8f0;
+  --text-muted: #8888aa;
+  --text-faint: #44445a;
+  --accent: #c084fc;
+  --accent2: #60a5fa;
+  --radius: 10px;
+  --transition: 0.25s ease;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'SF Pro Display', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg0);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── 顶部导航 ─── */
+.topnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  height: 52px;
+  background: var(--bg1);
+  border-bottom: 0.5px solid var(--border);
+  flex-shrink: 0;
+}
+
+.logo {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg2);
+  padding: 4px;
+  border-radius: var(--radius);
+}
+
+.tab {
+  padding: 6px 18px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: var(--transition);
+}
+.tab:hover { color: var(--text); background: var(--bg3); }
+.tab.active { background: var(--bg3); color: var(--text); font-weight: 500; }
+
+.nav-status { display: flex; gap: 8px; align-items: center; }
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  transition: var(--transition);
+  cursor: default;
+}
+.status-dot.on { background: #4ade80; box-shadow: 0 0 6px #4ade8088; }
+.status-dot.warn { background: #fbbf24; }
+.status-dot.err { background: #f87171; }
+
+/* ─── 页面容器 ─── */
+.tab-page { display: none; flex: 1; overflow: hidden; }
+.tab-page.active { display: flex; flex-direction: column; }
+
+/* ═══════════════════════════════
+   PAGE 1 · 互动花园
+═══════════════════════════════ */
+.garden-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr 200px;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* 左侧传感器面板 */
+.sensor-panel {
+  background: var(--bg1);
+  border-right: 0.5px solid var(--border);
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sensor-panel h3 {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding-bottom: 8px;
+  border-bottom: 0.5px solid var(--border);
+}
+
+.sensor-card {
+  background: var(--bg2);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sensor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.toggle-btn {
+  font-size: 11px;
+  padding: 3px 10px;
+  border: 0.5px solid var(--border-strong);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.toggle-btn:hover { background: var(--bg3); color: var(--text); }
+.toggle-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* 摄像头 */
+#camVideo {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--bg3);
+  display: none;
+}
+#faceCanvas {
+  position: absolute;
+  pointer-events: none;
+}
+#faceCard { position: relative; }
+
+.sensor-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+.sensor-info .label { color: var(--text-muted); }
+.sensor-info .value { color: var(--accent); font-weight: 500; }
+
+.sensor-row { display: flex; gap: 12px; }
+.sensor-row .sensor-info { flex: 1; }
+
+.emotion-bars { display: flex; flex-direction: column; gap: 3px; }
+.emotion-bar-row { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text-muted); }
+.emotion-bar-track { flex: 1; height: 3px; background: var(--bg3); border-radius: 2px; }
+.emotion-bar-fill { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
+
+/* 麦克风 */
+#micCanvas { width: 100%; height: 40px; }
+.mic-viz { background: var(--bg3); border-radius: 6px; overflow: hidden; }
+
+/* MIDI */
+.midi-map { display: flex; flex-direction: column; gap: 4px; }
+.midi-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.midi-val {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent2);
+  min-width: 24px;
+  text-align: right;
+}
+.midi-desc { color: var(--text-faint); }
+.midi-log {
+  font-size: 10px;
+  color: var(--text-faint);
+  font-family: monospace;
+  max-height: 40px;
+  overflow-y: auto;
+}
+
+/* ─── 中央舞台 ─── */
+.stage-main {
+  position: relative;
+  background: var(--bg0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#mainCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.flower-overlay {
+  position: absolute;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.flower-name {
+  font-size: 28px;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+.flower-en {
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+.flower-tags {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.flower-tag {
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: 0.5px solid;
+}
+
+.rule-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  background: rgba(10,10,15,0.85);
+  backdrop-filter: blur(8px);
+  border-top: 0.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  gap: 2rem;
+  z-index: 6;
+}
+.rule-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); }
+.rule-swatch { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.rule-icon { font-size: 13px; color: var(--text-faint); }
+.source-badge {
+  margin-left: auto;
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--bg3);
+  border: 0.5px solid var(--border-strong);
+  color: var(--accent);
+}
+
+/* ─── 右侧花朵列表 ─── */
+.flower-list {
+  background: var(--bg1);
+  border-left: 0.5px solid var(--border);
+  overflow-y: auto;
+  padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.flower-list h3 {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0 4px 8px;
+  border-bottom: 0.5px solid var(--border);
+}
+
+.flower-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 0.5px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: var(--transition);
+  width: 100%;
+}
+.flower-btn:hover { background: var(--bg2); border-color: var(--border); }
+.flower-btn.active { background: var(--bg2); border-color: var(--border-strong); }
+.flower-btn .fdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.flower-btn .flabel { font-size: 12px; font-weight: 500; color: var(--text); }
+.flower-btn .fsub { font-size: 10px; color: var(--text-faint); }
+
+/* ═══════════════════════════════
+   PAGE 2 · 花信系统
+═══════════════════════════════ */
+#tab-message { overflow-y: auto; }
+.message-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  height: 100%;
+}
+
+.msg-panel {
+  background: var(--bg1);
+  border: 0.5px solid var(--border);
+  border-radius: 14px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+}
+.msg-panel h2 { font-size: 18px; font-weight: 500; }
+.msg-panel .sub { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+.compose-flower-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.compose-flower-btn {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  border: 0.5px solid var(--border);
+  background: var(--bg2);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: var(--transition);
+  padding: 8px;
+}
+.compose-flower-btn:hover { border-color: var(--border-strong); background: var(--bg3); }
+.compose-flower-btn.active { border-width: 1.5px; }
+.compose-flower-btn .cfname { font-size: 11px; font-weight: 500; }
+.compose-flower-btn .cfdot { width: 16px; height: 16px; border-radius: 50%; }
+
+textarea {
+  background: var(--bg2);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 13px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.6;
+}
+textarea:focus { outline: none; border-color: var(--border-strong); }
+
+.compose-options select {
+  background: var(--bg2);
+  border: 0.5px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: var(--text);
+  font-size: 12px;
+  width: 100%;
+  margin-top: 6px;
+}
+.compose-options label { font-size: 12px; color: var(--text-muted); }
+
+.btn-primary {
+  padding: 10px 20px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: var(--transition);
+}
+.btn-primary:hover { opacity: 0.85; }
+
+.btn-secondary {
+  padding: 8px 14px;
+  background: var(--bg2);
+  border: 0.5px solid var(--border-strong);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 12px;
+  transition: var(--transition);
+}
+.btn-secondary:hover { background: var(--bg3); }
+
+.msg-preview-area {
+  position: relative;
+  background: var(--bg0);
+  border-radius: 10px;
+  overflow: hidden;
+  min-height: 240px;
+}
+#msgCanvas { width: 100%; height: 240px; display: block; }
+
+.msg-decode-panel {
+  position: absolute;
+  inset: 0;
+  background: rgba(10,10,15,0.9);
+  backdrop-filter: blur(10px);
+  padding: 1rem;
+  overflow-y: auto;
+}
+.msg-decode-panel h4 { font-size: 13px; margin-bottom: 8px; color: var(--accent); }
+
+.msg-decode-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+.msg-decode-key { color: var(--text-muted); min-width: 60px; }
+.msg-decode-val { color: var(--text); }
+
+.msg-original {
+  margin-top: 12px;
+  padding: 10px;
+  background: var(--bg2);
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.7;
+  border-left: 2px solid var(--accent);
+}
+
+.msg-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.flower-code-display {
+  background: var(--bg2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 11px;
+  color: var(--accent2);
+  word-break: break-all;
+  line-height: 1.7;
+  min-height: 40px;
+  border: 0.5px solid var(--border);
+}
+
+/* ═══════════════════════════════
+   PAGE 3 · Arduino
+═══════════════════════════════ */
+#tab-arduino { overflow-y: auto; }
+.arduino-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+.arduino-panel {
+  background: var(--bg1);
+  border: 0.5px solid var(--border);
+  border-radius: 14px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.arduino-panel h2 { font-size: 18px; font-weight: 500; }
+.arduino-panel .sub { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+.serial-connect { display: flex; align-items: center; gap: 12px; }
+.serial-info { font-size: 12px; color: var(--text-muted); }
+
+.arduino-live { display: flex; flex-direction: column; gap: 1rem; }
+
+.sensor-reading { display: flex; flex-direction: column; gap: 6px; }
+.reading-label { font-size: 11px; color: var(--text-muted); }
+
+.distance-bar-wrap, .light-bar-wrap {
+  height: 6px;
+  background: var(--bg3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.distance-bar, .light-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.15s ease;
+  background: var(--accent);
+  width: 0%;
+}
+.light-bar { background: #fbbf24; }
+.reading-value { font-size: 12px; color: var(--accent); font-weight: 500; }
+
+.touch-indicator {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  padding: 6px 12px;
+  background: var(--bg3);
+  border-radius: 6px;
+  display: inline-block;
+  transition: var(--transition);
+}
+.touch-indicator.touched { color: #4ade80; background: rgba(74,222,128,0.1); }
+
+.trigger-map h4 { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+.trigger-rows { display: flex; flex-direction: column; gap: 4px; }
+.trigger-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--bg2);
+}
+.trigger-row .tr-range { color: var(--accent2); font-weight: 500; min-width: 70px; }
+.trigger-row .tr-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.trigger-row.active-trigger { background: var(--bg3); border: 0.5px solid var(--border-strong); }
+
+.serial-log {
+  background: var(--bg0);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  font-family: 'SF Mono', monospace;
+  font-size: 10px;
+  color: #4ade80;
+  height: 120px;
+  overflow-y: auto;
+  line-height: 1.6;
+}
+
+.arduino-code {
+  background: var(--bg0);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 11px;
+  color: #a5f3fc;
+  overflow-y: auto;
+  max-height: 400px;
+  line-height: 1.7;
+  white-space: pre;
+  flex: 1;
+}
+
+/* ─── 滚动条 ─── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+/* ═══════════════════════════════
+   音乐播放器 (rule-bar 内嵌)
+═══════════════════════════════ */
+.music-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  background: var(--bg2);
+  border: 0.5px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px 4px 4px;
+}
+
+.music-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.music-btn:hover { opacity: 0.85; transform: scale(1.05); }
+.music-btn.playing { background: #4ade80; }
+
+.music-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 90px;
+}
+.music-name {
+  font-size: 11px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 110px;
+}
+.music-bpm {
+  font-size: 10px;
+  color: var(--text-faint);
+}
+
+/* 音乐波形可视化 */
+.music-viz {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 16px;
+  opacity: 0.5;
+  transition: opacity 0.3s;
+}
+.music-viz.active { opacity: 1; }
+.mvbar {
+  width: 3px;
+  background: var(--accent);
+  border-radius: 1px;
+  height: 3px;
+  transition: height 0.1s ease;
+}
+/* 播放时动画 */
+.music-viz.active .mvbar:nth-child(1) { animation: bar 0.7s ease infinite; }
+.music-viz.active .mvbar:nth-child(2) { animation: bar 0.5s ease infinite 0.1s; }
+.music-viz.active .mvbar:nth-child(3) { animation: bar 0.8s ease infinite 0.05s; }
+.music-viz.active .mvbar:nth-child(4) { animation: bar 0.6s ease infinite 0.15s; }
+.music-viz.active .mvbar:nth-child(5) { animation: bar 0.9s ease infinite 0.08s; }
+
+@keyframes bar {
+  0%, 100% { height: 3px; }
+  50% { height: 14px; }
+}
+
+/* 音量滑块 */
+.music-vol {
+  -webkit-appearance: none;
+  width: 60px;
+  height: 3px;
+  background: var(--bg3);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+.music-vol::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+
+/* 音乐风格角标（覆盖在花朵画布右上角） */
+.music-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 8;
+  background: rgba(10,10,15,0.75);
+  backdrop-filter: blur(6px);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+  pointer-events: none;
+  transition: all 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  opacity: 0;
+}
+.music-badge.visible { opacity: 1; }
+.music-badge .mb-style { color: var(--text); font-size: 12px; font-weight: 500; }
+.music-badge .mb-key { color: var(--text-muted); }

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CyberFlower Language — 未来花语系统</title>
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- face-api.js 人脸/情绪识别 -->
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+  <!-- Tone.js 音乐合成引擎 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════
+       顶部导航
+  ══════════════════════════════════════ -->
+  <nav class="topnav">
+    <span class="logo">🌸 CyberFlower Language</span>
+    <div class="nav-tabs">
+      <button class="tab active" data-tab="garden">互动花园</button>
+      <button class="tab" data-tab="message">花信系统</button>
+      <button class="tab" data-tab="arduino">硬件连接</button>
+    </div>
+    <div class="nav-status">
+      <span class="status-dot" id="camStatus" title="摄像头"></span>
+      <span class="status-dot" id="micStatus" title="麦克风"></span>
+      <span class="status-dot" id="midiStatus" title="MIDI"></span>
+      <span class="status-dot" id="serialStatus" title="Arduino"></span>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════
+       PAGE 1 · 互动花园
+  ══════════════════════════════════════ -->
+  <section id="tab-garden" class="tab-page active">
+
+    <div class="garden-layout">
+
+      <!-- 左：传感器面板 -->
+      <aside class="sensor-panel">
+        <h3>感应来源</h3>
+
+        <!-- 摄像头情绪 -->
+        <div class="sensor-card" id="faceCard">
+          <div class="sensor-header">
+            <span>👁 情绪识别</span>
+            <button class="toggle-btn" id="toggleCam">启动</button>
+          </div>
+          <video id="camVideo" autoplay muted playsinline></video>
+          <canvas id="faceCanvas"></canvas>
+          <div class="sensor-info">
+            <span class="label">当前情绪</span>
+            <span class="value" id="faceEmotion">—</span>
+          </div>
+          <div class="emotion-bars" id="emotionBars"></div>
+        </div>
+
+        <!-- 麦克风 -->
+        <div class="sensor-card" id="micCard">
+          <div class="sensor-header">
+            <span>🎙 声音感应</span>
+            <button class="toggle-btn" id="toggleMic">启动</button>
+          </div>
+          <div class="mic-viz">
+            <canvas id="micCanvas"></canvas>
+          </div>
+          <div class="sensor-row">
+            <div class="sensor-info">
+              <span class="label">音量</span>
+              <span class="value" id="micVolume">0</span>
+            </div>
+            <div class="sensor-info">
+              <span class="label">音调</span>
+              <span class="value" id="micPitch">—</span>
+            </div>
+          </div>
+          <div class="sensor-info">
+            <span class="label">映射至</span>
+            <span class="value" id="micFlower">—</span>
+          </div>
+        </div>
+
+        <!-- MIDI -->
+        <div class="sensor-card" id="midiCard">
+          <div class="sensor-header">
+            <span>🎹 MIDI 控制</span>
+            <button class="toggle-btn" id="toggleMidi">连接</button>
+          </div>
+          <div class="midi-map">
+            <div class="midi-row">
+              <span>CC1 调制轮</span><span class="midi-val" id="midiCC1">0</span>
+              <span class="midi-desc">→ 花瓣数量</span>
+            </div>
+            <div class="midi-row">
+              <span>CC7 音量</span><span class="midi-val" id="midiCC7">0</span>
+              <span class="midi-desc">→ 旋转速度</span>
+            </div>
+            <div class="midi-row">
+              <span>CC10 声像</span><span class="midi-val" id="midiCC10">0</span>
+              <span class="midi-desc">→ 波动幅度</span>
+            </div>
+            <div class="midi-row">
+              <span>Note On</span><span class="midi-val" id="midiNote">—</span>
+              <span class="midi-desc">→ 切换花型</span>
+            </div>
+          </div>
+          <div class="midi-log" id="midiLog"></div>
+        </div>
+
+      </aside>
+
+      <!-- 中：主画布 -->
+      <main class="stage-main">
+        <canvas id="mainCanvas"></canvas>
+
+        <!-- 音乐风格角标 -->
+        <div class="music-badge" id="musicBadge">
+          <span class="mb-style" id="mbStyle">—</span>
+          <span class="mb-key" id="mbKey">—</span>
+        </div>
+
+        <!-- 花朵信息覆盖层 -->
+        <div class="flower-overlay">
+          <div class="flower-name" id="overlayName">喜悦</div>
+          <div class="flower-en" id="overlayEn">Joy · Sunflower</div>
+          <div class="flower-tags" id="overlayTags"></div>
+        </div>
+
+        <!-- 底部规则条 -->
+        <div class="rule-bar">
+          <div class="rule-item"><span class="rule-swatch" id="rColor"></span><span id="rColorTxt">色彩</span></div>
+          <div class="rule-item"><span class="rule-icon">◈</span><span id="rFormTxt">形态</span></div>
+          <div class="rule-item"><span class="rule-icon">◎</span><span id="rRhythmTxt">节奏</span></div>
+          <div class="rule-item"><span class="rule-icon">·</span><span id="rParticleTxt">粒子</span></div>
+          <div class="rule-item source-badge" id="sourceBadge">手动选择</div>
+          <!-- 音乐播放器 -->
+          <div class="music-player" id="musicPlayer">
+            <button class="music-btn" id="musicToggle" title="播放/暂停花朵音乐">
+              <span id="musicIcon">▶</span>
+            </button>
+            <div class="music-info">
+              <span class="music-name" id="musicName">— 点击播放 —</span>
+              <span class="music-bpm" id="musicBpm"></span>
+            </div>
+            <div class="music-viz" id="musicViz">
+              <span class="mvbar"></span><span class="mvbar"></span><span class="mvbar"></span>
+              <span class="mvbar"></span><span class="mvbar"></span>
+            </div>
+            <input type="range" class="music-vol" id="musicVol" min="0" max="100" value="70" title="音量">
+          </div>
+        </div>
+      </main>
+
+      <!-- 右：花朵选择器 -->
+      <aside class="flower-list">
+        <h3>花语字典</h3>
+        <div id="flowerButtons"></div>
+      </aside>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       PAGE 2 · 花信系统
+  ══════════════════════════════════════ -->
+  <section id="tab-message" class="tab-page">
+    <div class="message-layout">
+
+      <!-- 发送端 -->
+      <div class="msg-panel compose">
+        <h2>✍️ 写一封花信</h2>
+        <p class="sub">选择情绪花朵，留下文字，生成一段只有懂得花语的人才能读懂的密文。</p>
+
+        <div class="compose-flower-grid" id="composeFlowerGrid"></div>
+
+        <textarea id="msgText" placeholder="写下你想说的话…" rows="4"></textarea>
+
+        <div class="compose-options">
+          <label>加密强度
+            <select id="encryptLevel">
+              <option value="visual">仅视觉加密（接收者看花，不见字）</option>
+              <option value="cipher">花语密文（可解码）</option>
+              <option value="hidden">隐写（字嵌入粒子轨迹）</option>
+            </select>
+          </label>
+        </div>
+
+        <button class="btn-primary" id="btnCompose">生成花信 →</button>
+      </div>
+
+      <!-- 预览/接收端 -->
+      <div class="msg-panel preview">
+        <h2>💌 花信预览</h2>
+        <div class="msg-preview-area">
+          <canvas id="msgCanvas"></canvas>
+          <div class="msg-decode-panel" id="msgDecodePanel" style="display:none">
+            <h4>解读花语</h4>
+            <div id="msgDecodeContent"></div>
+            <div class="msg-original" id="msgOriginalText"></div>
+          </div>
+        </div>
+        <div class="msg-actions">
+          <button class="btn-secondary" id="btnDecode">🔑 解码花信</button>
+          <button class="btn-secondary" id="btnCopyCode">📋 复制花信码</button>
+          <button class="btn-secondary" id="btnDownload">⬇️ 下载图像</button>
+        </div>
+        <div class="flower-code-display" id="flowerCodeDisplay"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       PAGE 3 · Arduino 硬件
+  ══════════════════════════════════════ -->
+  <section id="tab-arduino" class="tab-page">
+    <div class="arduino-layout">
+
+      <div class="arduino-panel">
+        <h2>🔌 Arduino 硬件连接</h2>
+        <p class="sub">通过 Web Serial API 连接 Arduino，距离传感器实时触发花型变化。</p>
+
+        <div class="serial-connect">
+          <button class="btn-primary" id="btnSerial">连接串口 (Web Serial)</button>
+          <span id="serialInfo" class="serial-info">未连接</span>
+        </div>
+
+        <div class="arduino-live" id="arduinoLive">
+          <div class="sensor-reading">
+            <span class="reading-label">距离传感器 (HC-SR04)</span>
+            <div class="distance-bar-wrap">
+              <div class="distance-bar" id="distanceBar"></div>
+            </div>
+            <span class="reading-value" id="distanceVal">— cm</span>
+          </div>
+
+          <div class="sensor-reading">
+            <span class="reading-label">触摸传感器</span>
+            <div class="touch-indicator" id="touchIndicator">未触碰</div>
+          </div>
+
+          <div class="sensor-reading">
+            <span class="reading-label">光敏传感器</span>
+            <div class="light-bar-wrap">
+              <div class="light-bar" id="lightBar"></div>
+            </div>
+            <span class="reading-value" id="lightVal">—</span>
+          </div>
+
+          <div class="trigger-map">
+            <h4>距离→花型映射规则</h4>
+            <div class="trigger-rows" id="triggerRows"></div>
+          </div>
+        </div>
+
+        <!-- 串口日志 -->
+        <div class="serial-log" id="serialLog"></div>
+      </div>
+
+      <!-- Arduino 代码展示 -->
+      <div class="arduino-panel code-panel">
+        <h2>📟 Arduino 源码</h2>
+        <p class="sub">将以下代码上传至 Arduino，通过 USB 串口发送传感器数据。</p>
+        <pre class="arduino-code" id="arduinoCode"></pre>
+        <button class="btn-secondary" id="btnCopyArduino">📋 复制代码</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 核心脚本 -->
+  <script src="js/flowers.js"></script>
+  <script src="js/music.js"></script>
+  <script src="js/canvas.js"></script>
+  <script src="js/faceDetect.js"></script>
+  <script src="js/microphone.js"></script>
+  <script src="js/midi.js"></script>
+  <script src="js/message.js"></script>
+  <script src="js/arduino.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+</html>
